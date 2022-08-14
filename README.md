@@ -1,6 +1,6 @@
 # mextractor: media metadata extractor
 
-Videos and images are large; sometimes, I only need the metadata of the media. `mextractor` automates the extraction and reading of these metadata files.
+Videos and images can be large. 
 
 ## Installation
 
@@ -12,17 +12,16 @@ pip install mextractor
 
 ## Usage
 
-### Video
-
-#### Extract
+### Extract and dump metadata
 ```python
 import mextractor
 
-metadata = mextractor.extract_video(path_to_video)
-metadata.dump(path_to_metadata)
+metadata = mextractor.extract_and_dump(path_to_dump, path_to_media)
 ```
 
-#### Load
+### Load media
+
+#### Video
 
 ```python
 import mextractor
@@ -33,25 +32,15 @@ print(video_metadata.fps)
 print(video_metadata.frames)
 print(video_metadata.resolution)
 print(video_metadata.seconds)
-print(video_metadata.milliseconds)
 print(video_metadata.path)
 print(video_metadata.bytes)
 ```
 
-### Image
-
-#### Extract
-```python
-import mextractor
-
-metadata = mextractor.extract_image(path_to_image)
-metadata.dump(path_to_metadata)
-```
-
-#### Load
+#### Image
 
 ```python
 import mextractor
+
 image_metadata = mextractor.parse_file(path_to_metadata)
 
 print(image_metadata.resolution)

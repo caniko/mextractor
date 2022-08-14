@@ -1,5 +1,7 @@
+from abc import ABC, abstractmethod
 from functools import cached_property
 from pathlib import Path
+from typing import Optional, TypeVar
 
 import webp
 from numpy._typing import NDArray
@@ -8,15 +10,24 @@ from pydantic_yaml import YamlModel
 from ruamel.yaml import YAML
 
 
-class _BaseMextractorMetadata(YamlModel):
+class _BaseMextractorMetadata(YamlModel, ABC):
     resolution: tuple[int, int]
-    webp_image: bytes
     path: Path
     bytes: int
+    webp_image: Optional[bytes]
 
     class Config:
         keep_untouched = (cached_property,)
         frozen = True
+
+    @classmethod
+    @abstractmethod
+    def extract(cls, media_path: FilePath, with_image: bool = True) -> "Metadata":
+        ...
+
+    @classmethod
+    def extract_and_dump(cls, dump_path: Path, **extract_kwargs) -> None:
+        cls.extract(**extract_kwargs).dump(dump_path)
 
     def dump(self, path: Path) -> bool:
         yaml = YAML()
@@ -25,9 +36,13 @@ class _BaseMextractorMetadata(YamlModel):
         return True
 
     @cached_property
-    def image(self) -> NDArray:
-        webp_data = webp.WebPData.from_buffer(self.webp_image)
-        return webp_data.decode(color_mode=webp.WebPColorMode.BGR)
+    def image(self) -> NDArray | None:
+        if self.webp_image:
+            webp_data = webp.WebPData.from_buffer(self.webp_image)
+            return webp_data.decode(color_mode=webp.WebPColorMode.BGR)
+
+
+Metadata = TypeVar("Metadata", bound=_BaseMextractorMetadata)
 
 
 def webp_compress_image(image_array: NDArray) -> bytes:
@@ -37,5 +52,10 @@ def webp_compress_image(image_array: NDArray) -> bytes:
     return bytes(pic.encode(config).buffer())
 
 
-def generic_media_metadata_dict(path_to_media: FilePath, image: NDArray) -> dict[str, bytes | int | Path]:
-    return {"webp_image": webp_compress_image(image), "bytes": path_to_media.stat().st_size, "path": path_to_media}
+def generic_media_metadata_dict(
+    path_to_media: FilePath, image_array: Optional[NDArray]
+) -> dict[str, bytes | int | Path]:
+    out = {"bytes": path_to_media.stat().st_size, "path": path_to_media}
+    if image_array is not None:
+        out["webp_image"] = webp_compress_image(image_array)
+    return out

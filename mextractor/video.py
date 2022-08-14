@@ -8,8 +8,14 @@ class MextractorVideoMetadata(_BaseMextractorMetadata):
     frames: int
     seconds: float
 
+    @classmethod
+    def extract(cls, media_path: FilePath, with_image: bool = True) -> "MextractorVideoMetadata":
+        return extract_video(media_path, with_image)
 
-def extract_video(path_to_video: FilePath, frame_time: str | int = "middle") -> MextractorVideoMetadata:
+
+def extract_video(
+    path_to_video: FilePath, with_image: bool = True, frame_to_extract_time: str | int = "middle"
+) -> MextractorVideoMetadata:
     try:
         import cv2, ffmpeg
     except ImportError:
@@ -19,18 +25,21 @@ def extract_video(path_to_video: FilePath, frame_time: str | int = "middle") -> 
     cap = cv2.VideoCapture(str(path_to_video))
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    msg = f"frame_time can only be defined as halfway, start, end, or integer; " f"not {type(frame_time)}"
-    if isinstance(frame_time, str):
-        if (frame_time := frame_time.lower()) == "middle":
+    msg = (
+        f"frame_to_extract_time can only be defined as halfway, start, end, or integer; "
+        f"not {type(frame_to_extract_time)}"
+    )
+    if isinstance(frame_to_extract_time, str):
+        if (frame_to_extract_time := frame_to_extract_time.lower()) == "middle":
             target_frame_index = round(frame_count / 2.0)
-        elif frame_time == "start" or frame_time == "beginning":
+        elif frame_to_extract_time == "start" or frame_to_extract_time == "beginning":
             target_frame_index = 0
-        elif frame_time == "end":
+        elif frame_to_extract_time == "end":
             target_frame_index = frame_count
         else:
             raise ValueError(msg)
-    elif isinstance(frame_time, int):
-        target_frame_index = frame_time
+    elif isinstance(frame_to_extract_time, int):
+        target_frame_index = frame_to_extract_time
     else:
         raise TypeError(msg)
 
@@ -52,5 +61,5 @@ def extract_video(path_to_video: FilePath, frame_time: str | int = "middle") -> 
         frames=ffmpeg_metadata["nb_frames"],
         fps=fps,
         seconds=ffmpeg_metadata["duration"],
-        **generic_media_metadata_dict(path_to_video, frame),
+        **generic_media_metadata_dict(path_to_video, frame if with_image else None),
     )
