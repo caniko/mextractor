@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from pydantic import FilePath
 
 from mextractor.base import _BaseMextractorMetadata, generic_media_metadata_dict
@@ -11,7 +9,9 @@ class MextractorImageMetadata(_BaseMextractorMetadata):
         return extract_image(media_path, with_image)
 
 
-def extract_image(path_to_image: FilePath, with_image: bool = True) -> MextractorImageMetadata:
+def extract_image(
+    path_to_image: FilePath, with_image: bool = True, compress_image: bool = True
+) -> MextractorImageMetadata:
     try:
         import cv2
     except ImportError:
@@ -22,5 +22,5 @@ def extract_image(path_to_image: FilePath, with_image: bool = True) -> Mextracto
 
     return MextractorImageMetadata(
         resolution=(image.shape[1], image.shape[0]),
-        **generic_media_metadata_dict(path_to_image, image if with_image else None)
+        **generic_media_metadata_dict(path_to_image, image if with_image else None, compress_image)
     )

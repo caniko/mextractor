@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import Optional, TypeVar
 
 import webp
-from numpy._typing import NDArray
 from pydantic import FilePath
+from pydantic_numpy import NDArray
 from pydantic_yaml import YamlModel
 from ruamel.yaml import YAML
 
@@ -15,6 +15,7 @@ class _BaseMextractorMetadata(YamlModel, ABC):
     path: Path
     bytes: int
     webp_image: Optional[bytes]
+    image_array: Optional[NDArray]
 
     class Config:
         keep_untouched = (cached_property,)
@@ -37,6 +38,8 @@ class _BaseMextractorMetadata(YamlModel, ABC):
 
     @cached_property
     def image(self) -> NDArray | None:
+        if self.image_array is not None:
+            return self.image_array
         if self.webp_image:
             webp_data = webp.WebPData.from_buffer(self.webp_image)
             return webp_data.decode(color_mode=webp.WebPColorMode.BGR)
@@ -53,9 +56,12 @@ def webp_compress_image(image_array: NDArray) -> bytes:
 
 
 def generic_media_metadata_dict(
-    path_to_media: FilePath, image_array: Optional[NDArray]
+    path_to_media: FilePath, image_array: Optional[NDArray], compress_image: bool = True
 ) -> dict[str, bytes | int | Path]:
     out = {"bytes": path_to_media.stat().st_size, "path": path_to_media}
     if image_array is not None:
-        out["webp_image"] = webp_compress_image(image_array)
+        if compress_image:
+            out["webp_image"] = webp_compress_image(image_array)
+        else:
+            out["image_array"] = image_array
     return out

@@ -14,7 +14,10 @@ class MextractorVideoMetadata(_BaseMextractorMetadata):
 
 
 def extract_video(
-    path_to_video: FilePath, with_image: bool = True, frame_to_extract_time: str | int = "middle"
+    path_to_video: FilePath,
+    with_image: bool = True,
+    frame_to_extract_time: str | int = "middle",
+    compress_image: bool = True,
 ) -> MextractorVideoMetadata:
     try:
         import cv2, ffmpeg
@@ -61,5 +64,5 @@ def extract_video(
         frames=ffmpeg_metadata["nb_frames"],
         fps=fps,
         seconds=ffmpeg_metadata["duration"],
-        **generic_media_metadata_dict(path_to_video, frame if with_image else None),
+        **generic_media_metadata_dict(path_to_video, frame if with_image else None, compress_image),
     )
