@@ -1,14 +1,7 @@
-from typing import Optional
-
 import cv2
 from pydantic import FilePath, validate_arguments
-from pydantic_numpy import NDArrayUint8
 
 from mextractor.base import MextractorMetadata
-
-
-def _generic_media_metadata_dict(path_to_media: FilePath, image_array: Optional[NDArrayUint8] = None) -> dict:
-    return {"bytes": path_to_media.stat().st_size, "path": path_to_media, "image": image_array}
 
 
 @validate_arguments
@@ -16,9 +9,7 @@ def extract_image(path_to_image: FilePath, include_image: bool = True, greyscale
     image = cv2.imread(str(path_to_image), 0 if greyscale else -1)
 
     return MextractorMetadata(
-        name=path_to_image.stem,
-        resolution=(image.shape[1], image.shape[0]),
-        **_generic_media_metadata_dict(path_to_image, image if include_image else None),
+        name=path_to_image.stem, resolution=(image.shape[1], image.shape[0]), image=image if include_image else None
     )
 
 
@@ -75,5 +66,5 @@ def extract_video(
         frames=ffmpeg_metadata["nb_frames"],
         average_fps=average_fps,
         seconds=ffmpeg_metadata["duration"],
-        **_generic_media_metadata_dict(path_to_video, frame if include_image else None),
+        image=frame if include_image else None,
     )

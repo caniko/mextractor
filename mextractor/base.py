@@ -24,7 +24,7 @@ class MextractorMetadata(BaseModel):
         frozen = True
 
     @classmethod
-    def load(cls, mextractor_dir: DirectoryPath) -> "MextractorMetadata":
+    def load(cls, mextractor_dir: DirectoryPath, greyscale: bool = True) -> "MextractorMetadata":
         image_array: Optional[NDArrayUint8] = None
         for file in mextractor_dir.iterdir():
             if "-image" not in file.stem:
@@ -33,7 +33,7 @@ class MextractorMetadata(BaseModel):
             if image_array is not None:
                 msg = f"More than one image in mextractor directory:\n  {mextractor_dir}"
                 raise ValueError(msg)
-            image_array = cv2.imread(str(file))
+            image_array = cv2.imread(str(file), 0 if greyscale else -1)
 
         metadata_path: FilePath
         for file in mextractor_dir.iterdir():
