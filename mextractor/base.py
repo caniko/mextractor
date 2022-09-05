@@ -1,67 +1,81 @@
-from abc import ABC, abstractmethod
+import logging
+import shutil
 from functools import cached_property
-from pathlib import Path
-from typing import Optional, TypeVar
+from typing import Optional
 
-import webp
-from pydantic import FilePath
-from pydantic_numpy import NDArray
-from pydantic_yaml import YamlModel
+import cv2
+from pydantic import DirectoryPath, BaseModel, FilePath
+from pydantic_numpy import NDArrayUint8
 from ruamel.yaml import YAML
 
+logger = logging.getLogger()
 
-class _BaseMextractorMetadata(YamlModel, ABC):
+
+class MextractorMetadata(BaseModel):
+    name: str
     resolution: tuple[int, int]
-    path: Path
-    bytes: int
-    webp_image: Optional[bytes]
-    image_array: Optional[NDArray]
+    average_fps: Optional[float]
+    video_length_in_seconds: Optional[float]
+
+    image: Optional[NDArrayUint8]
 
     class Config:
         keep_untouched = (cached_property,)
         frozen = True
 
     @classmethod
-    @abstractmethod
-    def extract(cls, media_path: FilePath, with_image: bool = True) -> "Metadata":
-        ...
+    def load(cls, mextractor_dir: DirectoryPath) -> "MextractorMetadata":
+        image_array: Optional[NDArrayUint8] = None
+        for file in mextractor_dir.iterdir():
+            if "-image" not in file.stem:
+                continue
 
-    @classmethod
-    def extract_and_dump(cls, dump_path: Path, **extract_kwargs) -> None:
-        cls.extract(**extract_kwargs).dump(dump_path)
+            if image_array is not None:
+                msg = f"More than one image in mextractor directory:\n  {mextractor_dir}"
+                raise ValueError(msg)
+            image_array = cv2.imread(str(file))
 
-    def dump(self, path: Path) -> bool:
+        metadata_path: FilePath
+        for file in mextractor_dir.iterdir():
+            if "-metadata" in file.stem:
+                metadata_path: FilePath = file
+                break
+        else:  # no break
+            msg = "Could not find metadata file inside mextractor directory"
+            raise ValueError(msg)
+
         yaml = YAML()
-        with open(path, "w") as out_yaml:
-            yaml.dump(self.dict(), out_yaml)
-        return True
+        with open(metadata_path, "r") as in_yaml:
+            return cls(**yaml.load(in_yaml), image=image_array)
 
-    @cached_property
-    def image(self) -> NDArray | None:
-        if self.image_array is not None:
-            return self.image_array
-        if self.webp_image:
-            webp_data = webp.WebPData.from_buffer(self.webp_image)
-            return webp_data.decode(color_mode=webp.WebPColorMode.BGR)
+    def dump(
+        self, dump_dir: DirectoryPath, include_image: bool = True, lossy_compress_image: bool = True
+    ) -> DirectoryPath:
+        dump_path = dump_dir / f"{self.name}.mextractor"
+        if dump_path.exists():
+            shutil.rmtree(dump_path)
+        dump_path.mkdir()
+
+        metadata = self.dict(exclude={"image"}, exclude_unset=True)
+
+        if include_image:
+            if lossy_compress_image:
+                image_filename = f"{self.name}-image.jpeg"
+                cv2.imwrite(str(dump_path / image_filename), self.image)
+            else:
+                image_filename = f"{self.name}-image.png"
+                cv2.imwrite(str(dump_path / image_filename), self.image, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+
+        yaml = YAML()
+        with open(dump_path / f"{self.name}-metadata.yaml", "w") as out_yaml:
+            yaml.dump(metadata, out_yaml)
+        return dump_dir
+
+    @property
+    def fps(self) -> float | None:
+        if self.average_fps:
+            logger.debug("Frame per second (FPS) from video is an average")
+            return self.average_fps
 
 
-Metadata = TypeVar("Metadata", bound=_BaseMextractorMetadata)
-
-
-def webp_compress_image(image_array: NDArray) -> bytes:
-    """Compresses the image array to WEBP format"""
-    pic = webp.WebPPicture.from_numpy(image_array)
-    config = webp.WebPConfig.new(preset=webp.WebPPreset.PHOTO, quality=70)
-    return bytes(pic.encode(config).buffer())
-
-
-def generic_media_metadata_dict(
-    path_to_media: FilePath, image_array: Optional[NDArray], compress_image: bool = True
-) -> dict[str, bytes | int | Path]:
-    out = {"bytes": path_to_media.stat().st_size, "path": path_to_media}
-    if image_array is not None:
-        if compress_image:
-            out["webp_image"] = webp_compress_image(image_array)
-        else:
-            out["image_array"] = image_array
-    return out
+load = MextractorMetadata.load

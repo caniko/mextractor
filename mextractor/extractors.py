@@ -1,31 +1,41 @@
-from pydantic import FilePath
+from typing import Optional
 
-from mextractor.base import _BaseMextractorMetadata, generic_media_metadata_dict
+import cv2
+from pydantic import FilePath, validate_arguments
+from pydantic_numpy import NDArrayUint8
 
-
-class MextractorVideoMetadata(_BaseMextractorMetadata):
-    fps: float
-    frames: int
-    seconds: float
-
-    @classmethod
-    def extract(cls, media_path: FilePath, with_image: bool = True) -> "MextractorVideoMetadata":
-        return extract_video(media_path, with_image)
+from mextractor.base import MextractorMetadata
 
 
+def _generic_media_metadata_dict(path_to_media: FilePath, image_array: Optional[NDArrayUint8] = None) -> dict:
+    return {"bytes": path_to_media.stat().st_size, "path": path_to_media, "image": image_array}
+
+
+@validate_arguments
+def extract_image(path_to_image: FilePath, include_image: bool = True, greyscale: bool = True) -> MextractorMetadata:
+    image = cv2.imread(str(path_to_image), 0 if greyscale else -1)
+
+    return MextractorMetadata(
+        name=path_to_image.stem,
+        resolution=(image.shape[1], image.shape[0]),
+        **_generic_media_metadata_dict(path_to_image, image if include_image else None),
+    )
+
+
+@validate_arguments
 def extract_video(
     path_to_video: FilePath,
-    with_image: bool = True,
+    include_image: bool = True,
     frame_to_extract_time: str | int = "middle",
-    compress_image: bool = True,
-) -> MextractorVideoMetadata:
+    greyscale: bool = True,
+) -> MextractorMetadata:
     try:
-        import cv2, ffmpeg
+        import ffmpeg
     except ImportError:
-        msg = "Install extractor extra to extract metadata"
+        msg = "Extra to extract video metadata not installed. Install by:\npip install mextractor[video-extract]"
         raise ImportError(msg)
 
-    cap = cv2.VideoCapture(str(path_to_video))
+    cap = cv2.VideoCapture(str(path_to_video), 0 if greyscale else -1)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     msg = (
@@ -55,14 +65,15 @@ def extract_video(
 
     if "/" in ffmpeg_metadata["avg_frame_rate"]:
         numerator, denominator = ffmpeg_metadata["avg_frame_rate"].split("/")
-        fps = int(numerator) / int(denominator)
+        average_fps = int(numerator) / int(denominator)
     else:
-        fps = float(ffmpeg_metadata["avg_frame_rate"])
+        average_fps = float(ffmpeg_metadata["avg_frame_rate"])
 
-    return MextractorVideoMetadata(
+    return MextractorMetadata(
+        name=path_to_video.stem,
         resolution=(ffmpeg_metadata["width"], ffmpeg_metadata["height"]),
         frames=ffmpeg_metadata["nb_frames"],
-        fps=fps,
+        average_fps=average_fps,
         seconds=ffmpeg_metadata["duration"],
-        **generic_media_metadata_dict(path_to_video, frame if with_image else None, compress_image),
+        **_generic_media_metadata_dict(path_to_video, frame if include_image else None),
     )

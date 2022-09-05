@@ -13,10 +13,21 @@ pip install mextractor
 ## Usage
 
 ### Extract and dump metadata
-```python
-import mextractor
 
-metadata = mextractor.extract_and_dump(path_to_dump, path_to_media)
+#### Video
+
+```python
+from mextractor.workflow import extract_and_dump_video
+
+metadata = extract_and_dump_video(dump_dir, path_to_video, include_image, greyscale, lossy_compress_image)
+```
+
+#### Image
+
+```python
+from mextractor.workflow import extract_and_dump_image
+
+metadata = extract_and_dump_image(dump_dir, path_to_image, include_image, greyscale, lossy_compress_image)
 ```
 
 ### Load media
@@ -26,14 +37,12 @@ metadata = mextractor.extract_and_dump(path_to_dump, path_to_media)
 ```python
 import mextractor
 
-video_metadata = mextractor.parse_file(path_to_metadata)
+video_metadata = mextractor.load(mextractor_dir)
 
-print(video_metadata.fps)
+print(video_metadata.average_fps)
 print(video_metadata.frames)
 print(video_metadata.resolution)
-print(video_metadata.seconds)
-print(video_metadata.path)
-print(video_metadata.bytes)
+print(video_metadata.video_length_in_seconds)
 ```
 
 #### Image
@@ -41,9 +50,7 @@ print(video_metadata.bytes)
 ```python
 import mextractor
 
-image_metadata = mextractor.parse_file(path_to_metadata)
+image_metadata = mextractor.load(mextractor_dir)
 
 print(image_metadata.resolution)
-print(image_metadata.path)
-print(image_metadata.bytes)
 ```

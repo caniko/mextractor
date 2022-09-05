@@ -1,29 +1,23 @@
-from mextractor.video import MextractorVideoMetadata
+from mextractor.base import MextractorMetadata
+from mextractor.workflow import extract_and_dump_video
 from tests import STATICS_PATH, OUTPUT_PATH
 
 TEST_VIDEO_PATH = STATICS_PATH / "mouse_in_box.mp4"
-VIDEO_METADATA_TEST_DUMP_PATH = OUTPUT_PATH / "video_test_dump.yaml"
 
 
 def test_video():
-    MextractorVideoMetadata.extract_and_dump(
-        VIDEO_METADATA_TEST_DUMP_PATH, media_path=TEST_VIDEO_PATH, with_image=True
+    metadata = extract_and_dump_video(
+        dump_dir=OUTPUT_PATH, path_to_video=TEST_VIDEO_PATH, include_image=True, lossy_compress_image=True
     )
 
-    loaded_metadata = MextractorVideoMetadata.parse_file(
-        path=VIDEO_METADATA_TEST_DUMP_PATH
-    )
+    loaded_metadata = MextractorMetadata.load(mextractor_dir=OUTPUT_PATH / f"{metadata.name}.mextractor")
     assert loaded_metadata
     assert loaded_metadata.image is not None
 
 
-def test_video_with_no_video():
-    MextractorVideoMetadata.extract_and_dump(
-        VIDEO_METADATA_TEST_DUMP_PATH, media_path=TEST_VIDEO_PATH, with_image=False
-    )
+def test_video():
+    metadata = extract_and_dump_video(dump_dir=OUTPUT_PATH, path_to_video=TEST_VIDEO_PATH, include_image=False)
 
-    loaded_metadata = MextractorVideoMetadata.parse_file(
-        path=VIDEO_METADATA_TEST_DUMP_PATH
-    )
+    loaded_metadata = MextractorMetadata.load(mextractor_dir=OUTPUT_PATH / f"{metadata.name}.mextractor")
     assert loaded_metadata
     assert loaded_metadata.image is None
