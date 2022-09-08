@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mextractor"
-version = "2.0.0"
+version = "2.0.1"
 description = "mextractor can extract media metadata to YAML and read them"
 readme = "README.md"
 repository = "https://github.com/caniko/media-metadata-extractor"
