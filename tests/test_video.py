@@ -7,7 +7,10 @@ TEST_VIDEO_PATH = STATICS_PATH / "mouse_in_box.mp4"
 
 def test_video():
     metadata = extract_and_dump_video(
-        dump_dir=OUTPUT_PATH, path_to_video=TEST_VIDEO_PATH, include_image=True, lossy_compress_image=True
+        dump_dir=OUTPUT_PATH,
+        path_to_video=TEST_VIDEO_PATH,
+        include_image=True,
+        lossy_compress_image=True,
     )
 
     loaded_metadata = MextractorMetadata.load(mextractor_dir=OUTPUT_PATH / f"{metadata.name}.mextractor")

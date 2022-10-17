@@ -8,6 +8,8 @@ from pydantic import DirectoryPath, BaseModel, FilePath
 from pydantic_numpy import NDArrayUint8
 from ruamel.yaml import YAML
 
+from mextractor.constants import DUMP_PATH_SUFFIX
+
 logger = logging.getLogger()
 
 
@@ -49,9 +51,12 @@ class MextractorMetadata(BaseModel):
             return cls(**yaml.load(in_yaml), image=image_array)
 
     def dump(
-        self, dump_dir: DirectoryPath, include_image: bool = True, lossy_compress_image: bool = True
+        self,
+        dump_dir: DirectoryPath,
+        include_image: bool = True,
+        lossy_compress_image: bool = True,
     ) -> DirectoryPath:
-        dump_path = dump_dir / f"{self.name}.mextractor"
+        dump_path = dump_dir / f"{self.name}{DUMP_PATH_SUFFIX}"
         if dump_path.exists():
             shutil.rmtree(dump_path)
         dump_path.mkdir()
@@ -64,7 +69,11 @@ class MextractorMetadata(BaseModel):
                 cv2.imwrite(str(dump_path / image_filename), self.image)
             else:
                 image_filename = f"{self.name}-image.png"
-                cv2.imwrite(str(dump_path / image_filename), self.image, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+                cv2.imwrite(
+                    str(dump_path / image_filename),
+                    self.image,
+                    [cv2.IMWRITE_PNG_COMPRESSION, 9],
+                )
 
         yaml = YAML()
         with open(dump_path / f"{self.name}-metadata.yaml", "w") as out_yaml:

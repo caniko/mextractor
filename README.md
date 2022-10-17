@@ -9,12 +9,27 @@ Download and install from PyPi with `pip`:
 ```shell
 pip install mextractor
 ```
+If you are extracting metadata from videos, install additional dependencies:
+```shell
+pip install mextractor[video-extract]
+```
 
 ## Usage
+Please back up your files before using them with the package, things might break during runtime causing corruption.
 
-### Extract and dump metadata
+### Command line interface (CLI)
 
-#### Video
+Copy directory to a new directory while extracting media info and a single frame from videos in subdirectories:
+```shell
+mextractor video-subdirs <path_to_root>
+```
+
+### Programmatically
+These functions are useful when integrating mextractor to your own package. You can also use it for quick scripts, see the `mextractor.workflows` submodule for inspiration.
+
+#### Extract and dump metadata
+
+##### Video
 
 ```python
 from mextractor.workflow import extract_and_dump_video
@@ -22,7 +37,7 @@ from mextractor.workflow import extract_and_dump_video
 metadata = extract_and_dump_video(dump_dir, path_to_video, include_image, greyscale, lossy_compress_image)
 ```
 
-#### Image
+##### Image
 
 ```python
 from mextractor.workflow import extract_and_dump_image
@@ -30,9 +45,9 @@ from mextractor.workflow import extract_and_dump_image
 metadata = extract_and_dump_image(dump_dir, path_to_image, include_image, greyscale, lossy_compress_image)
 ```
 
-### Load media
+#### Load media
 
-#### Video
+##### Video
 
 ```python
 import mextractor
@@ -45,7 +60,7 @@ print(video_metadata.resolution)
 print(video_metadata.video_length_in_seconds)
 ```
 
-#### Image
+##### Image
 
 ```python
 import mextractor

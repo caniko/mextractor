@@ -9,7 +9,9 @@ def extract_image(path_to_image: FilePath, include_image: bool = True) -> Mextra
     image = cv2.imread(str(path_to_image))
 
     return MextractorMetadata(
-        name=path_to_image.stem, resolution=(image.shape[1], image.shape[0]), image=image if include_image else None
+        name=path_to_image.stem,
+        resolution=(image.shape[1], image.shape[0]),
+        image=image if include_image else None,
     )
 
 
