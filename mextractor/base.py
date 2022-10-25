@@ -9,6 +9,7 @@ from pydantic_numpy import NDArrayUint8
 from ruamel.yaml import YAML
 
 from mextractor.constants import DUMP_PATH_SUFFIX
+from mextractor.utils import dump_image
 
 logger = logging.getLogger()
 
@@ -64,16 +65,7 @@ class MextractorMetadata(BaseModel):
         metadata = self.dict(exclude={"image"}, exclude_unset=True)
 
         if include_image:
-            if lossy_compress_image:
-                image_filename = f"{self.name}-image.jpeg"
-                cv2.imwrite(str(dump_path / image_filename), self.image)
-            else:
-                image_filename = f"{self.name}-image.png"
-                cv2.imwrite(
-                    str(dump_path / image_filename),
-                    self.image,
-                    [cv2.IMWRITE_PNG_COMPRESSION, 9],
-                )
+            dump_image(self.image, dump_path, self.name, lossy_compress_image)
 
         yaml = YAML()
         with open(dump_path / f"{self.name}-metadata.yaml", "w") as out_yaml:

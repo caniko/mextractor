@@ -3,9 +3,10 @@ from mextractor.workflow import extract_and_dump_video
 from tests import STATICS_PATH, OUTPUT_PATH
 
 TEST_VIDEO_PATH = STATICS_PATH / "mouse_in_box.mp4"
+TEST_BAD_VIDEO_PATH = STATICS_PATH / "bad_video.mp4"
 
 
-def test_video():
+def test_video_include_image():
     metadata = extract_and_dump_video(
         dump_dir=OUTPUT_PATH,
         path_to_video=TEST_VIDEO_PATH,

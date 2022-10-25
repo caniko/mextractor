@@ -16,17 +16,10 @@ def extract_image(path_to_image: FilePath, include_image: bool = True) -> Mextra
 
 
 @validate_arguments
-def extract_video(
+def extract_video_frame(
     path_to_video: FilePath,
-    include_image: bool = True,
     frame_to_extract_time: str | int = "middle",
-) -> MextractorMetadata:
-    try:
-        import ffmpeg
-    except ImportError:
-        msg = "Extra to extract video metadata not installed. Install by:\npip install mextractor[video-extract]"
-        raise ImportError(msg)
-
+):
     cap = cv2.VideoCapture(str(path_to_video))
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
@@ -53,6 +46,21 @@ def extract_video(
 
     assert res, f"Could not extract frame from media, {path_to_video}"
 
+    return frame
+
+
+@validate_arguments
+def extract_video(
+    path_to_video: FilePath,
+    include_image: bool = True,
+    frame_to_extract_time: str | int = "middle",
+) -> MextractorMetadata:
+    try:
+        import ffmpeg
+    except ImportError:
+        msg = "Extra to extract video metadata not installed. Install by:\npip install mextractor[video-extract]"
+        raise ImportError(msg)
+
     ffmpeg_metadata = ffmpeg.probe(path_to_video)["streams"][0]
 
     if "/" in ffmpeg_metadata["avg_frame_rate"]:
@@ -67,5 +75,5 @@ def extract_video(
         frames=ffmpeg_metadata["nb_frames"],
         average_fps=average_fps,
         seconds=ffmpeg_metadata["duration"],
-        image=frame if include_image else None,
+        image=extract_video_frame(path_to_video, frame_to_extract_time) if include_image else None,
     )
