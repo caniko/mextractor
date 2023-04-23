@@ -4,7 +4,7 @@ from functools import cached_property
 from typing import Optional
 
 import cv2
-from pydantic import DirectoryPath, BaseModel, FilePath
+from pydantic import BaseModel, DirectoryPath, FilePath
 from pydantic_numpy import NDArrayUint8
 from ruamel.yaml import YAML
 

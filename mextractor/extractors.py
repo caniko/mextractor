@@ -72,8 +72,6 @@ def extract_video(
     return MextractorMetadata(
         name=path_to_video.stem,
         resolution=(ffmpeg_metadata["width"], ffmpeg_metadata["height"]),
-        frames=ffmpeg_metadata["nb_frames"],
         average_fps=average_fps,
-        seconds=ffmpeg_metadata["duration"],
         image=extract_video_frame(path_to_video, frame_to_extract_time) if include_image else None,
     )

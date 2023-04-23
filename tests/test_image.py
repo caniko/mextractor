@@ -1,6 +1,6 @@
 from mextractor.base import MextractorMetadata
 from mextractor.workflow import extract_and_dump_image
-from tests import STATICS_PATH, OUTPUT_PATH
+from tests import OUTPUT_PATH, STATICS_PATH
 
 TEST_IMAGE_PATH = STATICS_PATH / "dworm.png"
 

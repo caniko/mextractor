@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from shutil import rmtree
 from typing import Optional
 
-from pydantic import FilePath, DirectoryPath, validate_arguments
+from pydantic import DirectoryPath, FilePath, validate_arguments
 
 from mextractor.base import MextractorMetadata
 from mextractor.constants import VIDEO_SUFFIXES
