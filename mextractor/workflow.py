@@ -36,7 +36,7 @@ def extract_and_dump_video(
 
 @validate_arguments
 def mextract_videos_in_subdirs(
-    root_dir: DirectoryPath, video_file_suffix: Optional[str] = None, only_frame: bool = False
+    root_dir: DirectoryPath, video_file_suffix: Optional[str] = None, only_frame: bool = False, concurrent: bool = True
 ) -> None:
     """
     Copy directory to a new directory while extracting media info and a single frame from videos in subdirectories
@@ -46,6 +46,7 @@ def mextract_videos_in_subdirs(
         rmtree(new_root)
     new_root.mkdir()
 
+    futures = []
     with ThreadPoolExecutor() as executor:
         for source_path in root_dir.glob("**/*.*"):
             dest_path = new_root / source_path.relative_to(root_dir)
@@ -55,13 +56,21 @@ def mextract_videos_in_subdirs(
 
             if video_file_suffix and video_file_suffix in dest_path.suffix or dest_path.suffix in VIDEO_SUFFIXES:
                 if only_frame:
-                    dump_image(
+                    futures.append(executor.submit(
+                        dump_image,
                         extract_video_frame(source_path),
                         dest_dir,
                         source_path.stem,
                         lossy_compress_image=False,
-                    )
+                    ))
                 else:
-                    executor.submit(extract_and_dump_video, dest_dir, source_path, include_image=True)
+                    futures.append(executor.submit(extract_and_dump_video, dest_dir, source_path, include_image=True))
             else:
-                executor.submit(shutil.copy, source_path, dest_path)
+                futures.append(executor.submit(shutil.copy, source_path, dest_path))
+
+    for future in futures:
+        try:
+            future.result()
+        except Exception as e:
+            shutil.rmtree(dest_dir)
+            raise e
