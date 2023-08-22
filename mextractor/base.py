@@ -5,7 +5,7 @@ from typing import Optional
 
 import cv2
 from pydantic import BaseModel, DirectoryPath, FilePath
-from pydantic_numpy import NDArrayUint8
+from pydantic_numpy import NpNDArrayUint8
 from ruamel.yaml import YAML
 
 from mextractor.constants import DUMP_PATH_SUFFIX
@@ -14,21 +14,17 @@ from mextractor.utils import dump_image
 logger = logging.getLogger()
 
 
-class MextractorMetadata(BaseModel):
+class MextractorMetadata(BaseModel, frozen=True):
     name: str
     resolution: tuple[int, int]
-    average_fps: Optional[float]
-    video_length_in_seconds: Optional[float]
+    average_fps: Optional[float] = None
+    video_length_in_seconds: Optional[float] = None
 
-    image: Optional[NDArrayUint8]
-
-    class Config:
-        keep_untouched = (cached_property,)
-        frozen = True
+    image: Optional[NpNDArrayUint8] = None
 
     @classmethod
     def load(cls, mextractor_dir: DirectoryPath) -> "MextractorMetadata":
-        image_array: Optional[NDArrayUint8] = None
+        image_array: Optional[NpNDArrayUint8] = None
         for file in mextractor_dir.iterdir():
             if "-image" not in file.stem:
                 continue

@@ -1,9 +1,9 @@
 import cv2
 from pydantic import DirectoryPath
-from pydantic_numpy import NDArray
+from pydantic_numpy import NpNDArray
 
 
-def dump_image(frame: NDArray, dump_path: DirectoryPath, name: str, lossy_compress_image: bool = True):
+def dump_image(frame: NpNDArray, dump_path: DirectoryPath, name: str, lossy_compress_image: bool = True):
     if lossy_compress_image:
         image_filename = f"{name}-image.jpeg"
         cv2.imwrite(str(dump_path / image_filename), frame)
