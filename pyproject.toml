@@ -6,7 +6,7 @@ readme = "README.md"
 repository = "https://github.com/caniko/media-metadata-extractor"
 homepage = "https://pypi.org/project/mextractor/"
 authors = ["Can H. Tartanoglu <canhtart@gmail.com>"]
-license = "BSD-4"
+license = "MIT OR Apache-2.0"
 keywords = ["metadata", "video", "image", "bigdata"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -51,7 +51,6 @@ target-version = ["py312"]
 
 [tool.ruff]
 line-length = 120
-
 
 [tool.poetry.group.type_checking.dependencies]
 pyright = "*"
