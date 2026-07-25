@@ -1,0 +1,5 @@
+[ci]
+provider = "actions"
+platform = "github"
+runtime = "nix"
+runner = "ubuntu-latest"
