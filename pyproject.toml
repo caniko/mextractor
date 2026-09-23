@@ -1,11 +1,9 @@
-[tool.poetry]
+[project]
 name = "mextractor"
 version = "6.0.2"
 description = "mextractor can extract media metadata to YAML and read them"
 readme = "README.md"
-repository = "https://github.com/caniko/media-metadata-extractor"
-homepage = "https://pypi.org/project/mextractor/"
-authors = ["Can H. Tartanoglu <canhtart@gmail.com>"]
+authors = [{name = "Can H. Tartanoglu", email = "canhtart@gmail.com"}]
 license = "MIT OR Apache-2.0"
 keywords = ["metadata", "video", "image", "bigdata"]
 classifiers = [
@@ -13,33 +11,31 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
-[tool.poetry.scripts]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "typer<1",
+    "ruamel.yaml",
+    "numpy",
+    "pydantic>=2.0,<3",
+    "pydantic-numpy>=7.0.0",
+    "opencv-python-headless>=4.6.0,<5",
+]
+
+[project.urls]
+Repository = "https://github.com/caniko/media-metadata-extractor"
+Homepage = "https://pypi.org/project/mextractor/"
+
+[project.scripts]
 mextractor = "mextractor.cli:cli_app"
 
-[tool.poetry.dependencies]
-python = ">=3.10, <3.14"
-typer = { version = "<1", extras = ["all"] }
-
-"ruamel.yaml" = "*"
-numpy = "*"
-
-pydantic = "^2.0"
-pydantic-numpy = ">=7.0.0"
-
-opencv-python = "^4.6.0"
-ffmpeg-python = {version = "*", optional = true}
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 video-extract = ["ffmpeg-python"]
 video = ["ffmpeg-python"]
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.1.2"
-
-[tool.poetry.group.format.dependencies]
-black = "*"
-isort = "*"
-ruff = "*"
+[dependency-groups]
+dev = ["pytest>=7.1.2,<8", {include-group = "format"}, {include-group = "type_checking"}, "ffmpeg-python"]
+format = ["black", "isort", "ruff"]
+type_checking = ["pyright"]
 
 [tool.isort]
 profile = "black"
@@ -52,12 +48,9 @@ target-version = ["py312"]
 [tool.ruff]
 line-length = 120
 
-[tool.poetry.group.type_checking.dependencies]
-pyright = "*"
-
 [tool.pyright]
 include = ["mextractor/**", "tests/**"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
