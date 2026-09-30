@@ -1,4 +1,7 @@
+import pytest
+
 from mextractor.base import load_image
+from mextractor.extractors import extract_image
 from mextractor.workflow import extract_and_dump_image
 from tests import OUTPUT_PATH, STATICS_PATH
 
@@ -24,3 +27,10 @@ def test_image_with_no_image():
     loaded_metadata = load_image(mextractor_dir=OUTPUT_PATH / f"{metadata.name}.mextractor")
     assert loaded_metadata
     assert loaded_metadata.image is None
+
+
+def test_invalid_image_is_rejected(tmp_path):
+    source = tmp_path / "broken.png"
+    source.write_bytes(b"not an image")
+    with pytest.raises(ValueError, match="Could not decode image"):
+        extract_image(source)

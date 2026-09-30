@@ -1,3 +1,22 @@
+[project]
+name = "mextractor"
+requires-python = ">=3.10,<3.14"
+dynamic = [
+  "version",
+  "description",
+  "readme",
+  "authors",
+  "license",
+  "keywords",
+  "classifiers",
+  "dependencies",
+  "optional-dependencies",
+  "scripts",
+]
+
+[dependency-groups]
+dev = ["pytest>=7.1.2,<8", "mypy", "ruff", "pyright", "black", "isort"]
+
 [tool.poetry]
 name = "mextractor"
 version = "6.0.2"
@@ -9,8 +28,8 @@ authors = ["Can H. Tartanoglu <canhtart@gmail.com>"]
 license = "MIT OR Apache-2.0"
 keywords = ["metadata", "video", "image", "bigdata"]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+  "Development Status :: 4 - Beta",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
 [tool.poetry.scripts]
@@ -27,7 +46,7 @@ pydantic = "^2.0"
 pydantic-numpy = ">=7.0.0"
 
 opencv-python = "^4.6.0"
-ffmpeg-python = {version = "*", optional = true}
+ffmpeg-python = { version = "*", optional = true }
 
 [tool.poetry.extras]
 video-extract = ["ffmpeg-python"]
@@ -58,6 +77,10 @@ pyright = "*"
 [tool.pyright]
 include = ["mextractor/**", "tests/**"]
 
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+follow_untyped_imports = true
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
