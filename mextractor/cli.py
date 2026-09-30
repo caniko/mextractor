@@ -17,8 +17,10 @@ def extract(
         ),
     ],
     video_suffixes: Annotated[
-        list[str], typer.Option(help="Limit the suffixes that will be scanned, omit to include all")
-    ] = VIDEO_SUFFIXES,
+        list[str] | None, typer.Option(help="Limit the suffixes that will be scanned, omit to include all")
+    ] = None,
     only_frame: Annotated[bool, typer.Option(is_flag=True, flag_value=True)] = False,
 ) -> None:
-    mextract_videos_in_subdirs(start_dir, video_suffixes, only_frame=only_frame)
+    mextract_videos_in_subdirs(
+        start_dir, VIDEO_SUFFIXES if video_suffixes is None else video_suffixes, only_frame=only_frame
+    )

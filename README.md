@@ -1,6 +1,6 @@
 # mextractor: media metadata extractor
 
-Videos and images can be large. 
+Videos and images can be large.
 
 ## Installation
 
@@ -9,22 +9,27 @@ Download and install from PyPi with `pip`:
 ```shell
 pip install mextractor
 ```
+
 If you are extracting metadata from videos, install additional dependencies:
+
 ```shell
 pip install mextractor[video-extract]
 ```
 
 ## Usage
+
 Please back up your files before using them with the package, things might break during runtime causing corruption.
 
 ### Command line interface (CLI)
 
 Copy directory to a new directory while extracting media info and a single frame from videos in subdirectories:
+
 ```shell
 mextractor video-subdirs <path_to_root>
 ```
 
 ### Programmatically
+
 These functions are useful when integrating mextractor to your own package. You can also use it for quick scripts, see the `mextractor.workflows` submodule for inspiration.
 
 #### Extract and dump metadata

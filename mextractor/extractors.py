@@ -7,6 +7,8 @@ from mextractor.base import MEXTRACTOR_SCHEMA_VERSION, ImageMextractorMetadata, 
 @validate_call
 def extract_image(path_to_image: FilePath, include_image: bool = True) -> ImageMextractorMetadata:
     image = cv2.imread(str(path_to_image))
+    if image is None:
+        raise ValueError(f"Could not decode image: {path_to_image}")
 
     return ImageMextractorMetadata(
         version=MEXTRACTOR_SCHEMA_VERSION,

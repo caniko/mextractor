@@ -1,6 +1,6 @@
 import logging
 import shutil
-from typing import Any, Final, Optional, Self
+from typing import Any, Final, Optional, Self, cast
 
 import cv2
 from pydantic import BaseModel, DirectoryPath, Field, FilePath, PositiveInt, model_validator
@@ -41,12 +41,13 @@ class BaseMextractorMetadata(BaseModel, frozen=True):
                 msg = f"More than one image in mextractor directory:\n  {mextractor_dir}"
                 raise ValueError(msg)
 
-            image_array = cv2.imread(str(file))
+            # OpenCV's default color-read mode returns an 8-bit array.
+            image_array = cast(Optional[NpNDArrayUint8], cv2.imread(str(file)))
 
         metadata_path: FilePath
         for file in mextractor_dir.iterdir():
             if "-metadata" in file.stem:
-                metadata_path: FilePath = file
+                metadata_path = file
                 break
         else:  # no break
             msg = "Could not find metadata file inside mextractor directory"
@@ -70,6 +71,8 @@ class BaseMextractorMetadata(BaseModel, frozen=True):
         metadata = self.model_dump(exclude_unset=True)
 
         if include_image:
+            if self.image is None:
+                raise ValueError("Cannot dump an image when no image was loaded")
             dump_image(self.image, dump_path, self.name, lossy_compress_image)
 
         yaml = YAML()
@@ -78,13 +81,13 @@ class BaseMextractorMetadata(BaseModel, frozen=True):
         return dump_dir
 
 
-class ImageMextractorMetadata(BaseMextractorMetadata): ...
+class ImageMextractorMetadata(BaseMextractorMetadata, frozen=True): ...
 
 
 load_image = ImageMextractorMetadata.load
 
 
-class VideoMextractorMetadata(BaseMextractorMetadata):
+class VideoMextractorMetadata(BaseMextractorMetadata, frozen=True):
     average_fps: float
     video_length_in_seconds: Optional[float] = None
 

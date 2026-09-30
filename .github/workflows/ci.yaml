@@ -7,8 +7,11 @@ on:
     tags-ignore: ["**"]
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow_ref }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -24,6 +27,11 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
 
+      - name: Configure GitHub input transport
+        run: |
+          git config --global --add url.https://github.com/.insteadOf ssh://git@github.com/
+          git config --global --add url.https://github.com/.insteadOf git@github.com:
+
       - name: Check generated flake wiring
         run: nix run --no-write-lock-file git+https://github.com/caniko/simit.git -- init flake --check --diff
 
@@ -36,5 +44,5 @@ jobs:
       - name: Build check typecheck
         run: nix build .#checks.x86_64-linux.typecheck
 
-      - name: Build check uv-format
-        run: nix build .#checks.x86_64-linux.uv-format
+      - name: Build check formatting
+        run: nix build .#checks.x86_64-linux.formatting

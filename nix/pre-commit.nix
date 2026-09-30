@@ -5,7 +5,8 @@
   treefmt = {
     enable = true;
     name = "treefmt";
-    entry = "${treefmtWrapper}/bin/treefmt --fail-on-change";
+    package = treefmtWrapper;
+    entry = "${treefmtWrapper}/bin/treefmt --ci";
     pass_filenames = false;
   };
 
@@ -16,14 +17,6 @@
     extraPackages = [pkgs.nix];
     pass_filenames = false;
     stages = ["manual"];
-  };
-
-  uv-ruff-format = {
-    enable = true;
-    name = "uv ruff format";
-    entry = "uv run ruff format --check .";
-    extraPackages = [pkgs.uv];
-    pass_filenames = false;
   };
 
   uv-mypy = {
