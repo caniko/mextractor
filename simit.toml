@@ -3,3 +3,4 @@ provider = "actions"
 platform = "github"
 runtime = "nix"
 runner = "ubuntu-latest"
+all_features = false

@@ -7,8 +7,11 @@ on:
     tags-ignore: ["**"]
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow_ref }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -36,5 +39,5 @@ jobs:
       - name: Build check typecheck
         run: nix build .#checks.x86_64-linux.typecheck
 
-      - name: Build check uv-format
-        run: nix build .#checks.x86_64-linux.uv-format
+      - name: Build check formatting
+        run: nix build .#checks.x86_64-linux.formatting
