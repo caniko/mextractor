@@ -1,3 +1,8 @@
+[flake]
+scope = "full"
+mode = "custom"
+backend = "py-harbor"
+
 [ci]
 provider = "actions"
 platform = "github"
