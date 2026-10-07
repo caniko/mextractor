@@ -1,0 +1,40 @@
+name: Poetry compatibility
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow_ref }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  poetry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        run: python -m pip install poetry==2.2.1
+      - name: Regenerate lock without upgrading compatible dependencies
+        run: poetry lock
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: poetry-lock-${{ github.sha }}
+          path: poetry.lock
+          if-no-files-found: error
+      - name: Test Poetry installation
+        run: |
+          poetry check --lock
+          poetry sync --all-extras
+          poetry run pytest
+      - name: Check committed lock is current
+        run: git diff --exit-code -- poetry.lock
