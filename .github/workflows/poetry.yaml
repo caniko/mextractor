@@ -22,6 +22,10 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.12"
+      - name: Install media test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Install Poetry
         run: python -m pip install poetry==2.2.1
       - name: Regenerate lock without upgrading compatible dependencies
