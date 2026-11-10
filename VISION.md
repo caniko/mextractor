@@ -32,9 +32,9 @@ and the formats drift between projects.
 ## Scope
 
 - metadata extraction for videos and images
-- optional single-frame extraction, greyscale and lossy image compression
+- optional single-frame extraction and lossy image compression
 - YAML dump and load
-- `video-subdirs` CLI workflow that copies a tree and extracts media info
+- `extract` CLI command that copies a tree and extracts media info
 - workflow helpers for integrating extraction into another package
 - packaging as a PyPI project with a uv-locked development environment
 
@@ -46,5 +46,5 @@ current pydantic-numpy.
 
 ## Place in the fleet
 
-`oul-analysis` depends on `mextractor>=6.0.2,<7` and pins the published revision
-in its `pyproject.toml`.
+`oul-analysis` depends on `mextractor>=6.0.2,<7` and pins a git revision in its
+`pyproject.toml`.
